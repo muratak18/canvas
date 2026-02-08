@@ -210,7 +210,12 @@
         .map((it) => (Array.isArray(it.types) ? it.types.join(',') : ''))
         .filter(Boolean)
         .join(' | ');
-      setStatus(types ? `Clipboard has no image (types: ${types})` : 'Clipboard has no image');
+      
+      if (types.includes('text/plain') && !types.includes('image')) {
+        setStatus('Copy an image file, not text. Try Choose file instead.');
+      } else {
+        setStatus(types ? `Clipboard has no image (types: ${types})` : 'Clipboard has no image');
+      }
     } catch (err) {
       setStatus('Clipboard read failed');
     }
@@ -365,10 +370,13 @@
   }
 
   if (pasteBtn) {
-    pasteBtn.addEventListener('click', async () => {
+    pasteBtn.addEventListener('click', () => {
       if (state.locked) return;
       setImportMenuOpen(false);
-      await pasteFromClipboard();
+      setStatus('Press Cmd+V (or Ctrl+V) to paste image');
+      setTimeout(() => {
+        if (!state.img) setStatus('Ready');
+      }, 3000);
     });
   }
 
