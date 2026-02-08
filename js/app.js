@@ -5,6 +5,9 @@
   const ctx = canvas.getContext('2d', { alpha: false });
 
   const importBtn = document.getElementById('importBtn');
+  const importMenu = document.getElementById('importMenu');
+  const pasteBtn = document.getElementById('pasteBtn');
+  const chooseFileBtn = document.getElementById('chooseFileBtn');
   const fitBtn = document.getElementById('fitBtn');
   const rotateLeftBtn = document.getElementById('rotateLeftBtn');
   const rotateRightBtn = document.getElementById('rotateRightBtn');
@@ -140,6 +143,79 @@
     loadImageFromBlob(blob);
   }
 
+  function setImportMenuOpen(open) {
+    if (!importMenu || !importBtn) return;
+    importMenu.classList.toggle('hidden', !open);
+    importBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+
+  async function pasteFromClipboard() {
+    if (state.locked) return;
+    if (!navigator.clipboard || typeof navigator.clipboard.read !== 'function') {
+      setStatus('Clipboard paste not supported here');
+      return;
+    }
+
+    try {
+      const items = await navigator.clipboard.read();
+      for (const item of items) {
+        const imageType = item.types.find((t) => t.startsWith('image/'));
+        if (!imageType) continue;
+        const blob = await item.getType(imageType);
+        loadImageFromBlob(blob);
+        return;
+      }
+
+      for (const item of items) {
+        const htmlType = item.types.find((t) => t === 'text/html');
+        if (!htmlType) continue;
+        const htmlBlob = await item.getType(htmlType);
+        const html = await htmlBlob.text();
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const imgEl = doc.querySelector('img');
+        const src = imgEl && imgEl.getAttribute('src');
+        if (!src) continue;
+        if (src.startsWith('data:image/')) {
+          const res = await fetch(src);
+          const blob = await res.blob();
+          loadImageFromBlob(blob);
+          return;
+        }
+        if (/^https?:\/\//i.test(src)) {
+          const res = await fetch(src);
+          const blob = await res.blob();
+          loadImageFromBlob(blob);
+          return;
+        }
+      }
+
+      if (typeof navigator.clipboard.readText === 'function') {
+        const text = await navigator.clipboard.readText();
+        const trimmed = (text || '').trim();
+        if (trimmed.startsWith('data:image/')) {
+          const res = await fetch(trimmed);
+          const blob = await res.blob();
+          loadImageFromBlob(blob);
+          return;
+        }
+        if (/^https?:\/\//i.test(trimmed) && /\.(png|jpe?g|gif|webp|bmp)(\?|#|$)/i.test(trimmed)) {
+          const res = await fetch(trimmed);
+          const blob = await res.blob();
+          loadImageFromBlob(blob);
+          return;
+        }
+      }
+
+      const types = items
+        .map((it) => (Array.isArray(it.types) ? it.types.join(',') : ''))
+        .filter(Boolean)
+        .join(' | ');
+      setStatus(types ? `Clipboard has no image (types: ${types})` : 'Clipboard has no image');
+    } catch (err) {
+      setStatus('Clipboard read failed');
+    }
+  }
+
   function preventTouchScroll(e) {
     if (!state.locked) return;
     e.preventDefault();
@@ -267,8 +343,36 @@
     };
   }
 
-  if (importBtn && fileInput) {
-    importBtn.addEventListener('click', () => fileInput.click());
+  if (importBtn && importMenu) {
+    importBtn.addEventListener('click', () => {
+      if (state.locked) return;
+      const isOpen = !importMenu.classList.contains('hidden');
+      setImportMenuOpen(!isOpen);
+    });
+  } else if (importBtn && fileInput) {
+    importBtn.addEventListener('click', () => {
+      if (state.locked) return;
+      fileInput.click();
+    });
+  }
+
+  if (chooseFileBtn && fileInput) {
+    chooseFileBtn.addEventListener('click', () => {
+      if (state.locked) return;
+      setImportMenuOpen(false);
+      fileInput.click();
+    });
+  }
+
+  if (pasteBtn) {
+    pasteBtn.addEventListener('click', async () => {
+      if (state.locked) return;
+      setImportMenuOpen(false);
+      await pasteFromClipboard();
+    });
+  }
+
+  if (fileInput) {
     fileInput.addEventListener('change', () => {
       const file = fileInput.files && fileInput.files[0];
       if (!file) return;
@@ -276,6 +380,20 @@
       fileInput.value = '';
     });
   }
+
+  document.addEventListener('click', (e) => {
+    if (!importMenu || !importBtn) return;
+    if (importMenu.classList.contains('hidden')) return;
+    const target = e.target;
+    if (!(target instanceof Node)) return;
+    if (importMenu.contains(target) || importBtn.contains(target)) return;
+    setImportMenuOpen(false);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    setImportMenuOpen(false);
+  });
 
   if (fitBtn) fitBtn.addEventListener('click', () => (!state.locked ? fitToScreen() : undefined));
   if (rotateLeftBtn) rotateLeftBtn.addEventListener('click', () => (!state.locked ? rotateBy(-Math.PI / 18) : undefined));

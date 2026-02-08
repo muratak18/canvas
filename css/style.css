@@ -118,6 +118,40 @@ textarea {
   transform: translateY(1px);
 }
 
+.menuWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 200px;
+  background: rgba(18, 20, 26, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  z-index: 10;
+}
+
+.menuItem {
+  width: 100%;
+  text-align: left;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 10px 10px;
+  border-radius: 10px;
+  font: inherit;
+}
+
+.menuItem:active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .zoom {
   display: inline-flex;
   align-items: center;
