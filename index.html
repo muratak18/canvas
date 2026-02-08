@@ -1,0 +1,54 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title></title>
+  <link rel="stylesheet" href="css/style.css">
+  <meta name="description" content="">
+
+  <meta property="og:title" content="">
+  <meta property="og:type" content="">
+  <meta property="og:url" content="">
+  <meta property="og:image" content="">
+  <meta property="og:image:alt" content="">
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.png">
+
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#fafafa">
+</head>
+
+<body>
+
+  <div id="app" class="app">
+    <header class="toolbar" role="toolbar" aria-label="Image canvas controls">
+      <button id="importBtn" class="btn" type="button">Import</button>
+      <button id="fitBtn" class="btn" type="button">Fit</button>
+      <button id="rotateLeftBtn" class="btn" type="button">Rotate -</button>
+      <button id="rotateRightBtn" class="btn" type="button">Rotate +</button>
+      <label class="zoom" aria-label="Zoom">
+        <span class="zoomLabel">Zoom</span>
+        <input id="zoomRange" type="range" min="0.05" max="8" value="1" step="0.01">
+      </label>
+      <button id="lockBtn" class="btn" type="button" aria-pressed="false">Lock</button>
+      <div id="status" class="status" aria-live="polite"></div>
+    </header>
+
+    <main class="stage" aria-label="Canvas stage">
+      <canvas id="canvas" class="canvas" aria-label="Image canvas"></canvas>
+      <div id="hint" class="hint" role="note">
+        Paste an image (Cmd+V) or use Import.
+      </div>
+      <input id="fileInput" class="hidden" type="file" accept="image/*">
+    </main>
+  </div>
+
+  <script src="js/app.js"></script>
+
+</body>
+
+</html>
