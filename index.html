@@ -26,7 +26,13 @@
 
   <div id="app" class="app">
     <header class="toolbar" role="toolbar" aria-label="Image canvas controls">
-      <button id="importBtn" class="btn" type="button">Import</button>
+      <div class="menuWrap">
+        <button id="importBtn" class="btn" type="button" aria-haspopup="menu" aria-expanded="false">Import</button>
+        <div id="importMenu" class="menu hidden" role="menu" aria-label="Import menu">
+          <button id="pasteBtn" class="menuItem" type="button" role="menuitem">Paste (use Cmd+V)</button>
+          <button id="chooseFileBtn" class="menuItem" type="button" role="menuitem">Choose file</button>
+        </div>
+      </div>
       <button id="fitBtn" class="btn" type="button">Fit</button>
       <button id="rotateLeftBtn" class="btn" type="button">Rotate -</button>
       <button id="rotateRightBtn" class="btn" type="button">Rotate +</button>

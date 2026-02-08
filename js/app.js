@@ -285,7 +285,7 @@
       }
       fileInput.click();
     });
-    
+
     fileInput.addEventListener('change', () => {
       const file = fileInput.files && fileInput.files[0];
       if (!file) return;
