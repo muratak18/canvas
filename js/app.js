@@ -130,13 +130,21 @@
   }
 
   function onPaste(e) {
+    if (state.locked) {
+      setStatus('Unlock to paste images');
+      return;
+    }
     if (!e.clipboardData) return;
     const items = Array.from(e.clipboardData.items || []);
     const imageItem = items.find((it) => it.type && it.type.startsWith('image/'));
-    if (!imageItem) return;
+    if (!imageItem) {
+      setStatus('No image in clipboard. Use Import button.');
+      return;
+    }
     const blob = imageItem.getAsFile();
     if (!blob) return;
     e.preventDefault();
+    setStatus('Pasting image...');
     loadImageFromBlob(blob);
   }
 
@@ -268,10 +276,20 @@
   }
 
   if (importBtn && fileInput) {
-    importBtn.addEventListener('click', () => fileInput.click());
+    importBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (state.locked) {
+        setStatus('Unlock to import images');
+        return;
+      }
+      fileInput.click();
+    });
+    
     fileInput.addEventListener('change', () => {
       const file = fileInput.files && fileInput.files[0];
       if (!file) return;
+      setStatus('Loading image...');
       loadImageFromBlob(file);
       fileInput.value = '';
     });
